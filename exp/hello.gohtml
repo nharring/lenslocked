@@ -1,0 +1,8 @@
+<h1>Hello, {{.Name}}!</h1></p>
+<h2>Happy {{.FavoriteDay}}</h2></p>
+As you probably know, its {{.UnixTime}} right now.
+This is how an array of strings displays: {{.Tags}}
+A whole map: {{.KVP}}
+Key1 in the map: {{.KVP.key1}}
+{{define "PrintKV"}}All the keys in the map:{{range $key, $val := .}}<p>{{printf "key: %s  val: %s" $key $val}}</p>{{end}}
+{{if .PrintMap eq true}}{{template "PrintKV" .KVP}}{{end}}
