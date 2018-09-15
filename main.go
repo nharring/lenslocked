@@ -2,52 +2,54 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
+	"lenslocked.com/views"
 )
 
-var homeTemplate *template.Template
-var contactTemplate *template.Template
+var homeView *views.View
+var contactView *views.View
+var faqView *views.View
+var signupView *views.View
 
-func home(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.Header().Set("Content-Type", "text/html")
-	if err := homeTemplate.Execute(w, nil); err != nil {
+func must(err error) {
+	if err != nil {
 		panic(err)
 	}
 }
-func contact(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := contactTemplate.Execute(w, nil); err != nil {
-		panic(err)
-	}
+	must(homeView.Render(w, nil))
 }
-func faq(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<h1>Frequently Asked Questions:</h1></p> "+
-		"1. Yes? No</p>")
+	must(contactView.Render(w, nil))
+}
+func faq(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	must(faqView.Render(w, nil))
 }
 func notfound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprint(w, "<h1>Unable to find the page you requested.</h1>")
 }
+func signup(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	must(signupView.Render(w, nil))
+}
 
 func main() {
-	var err error
-	homeTemplate, err = template.ParseFiles("views/home.gohtml")
-	if err != nil {
-		panic(err)
-	}
-	contactTemplate, err = template.ParseFiles("views/contact.gohtml")
-	if err != nil {
-		panic(err)
-	}
-	router := httprouter.New()
-	router.GET("/", home)
-	router.GET("/contact", contact)
-	router.GET("/faq", faq)
-	var h http.Handler = http.HandlerFunc(notfound)
-	router.NotFound = h
-	http.ListenAndServe(":3000", router)
+	homeView = views.NewNamedView("bootstrap", "home")
+	contactView = views.NewNamedView("bootstrap", "contact")
+	faqView = views.NewNamedView("bootstrap", "faq")
+	signupView = views.NewNamedView("bootstrap", "signup")
+	r := mux.NewRouter()
+	r.HandleFunc("/", home)
+	r.HandleFunc("/contact", contact)
+	r.HandleFunc("/faq", faq)
+	r.HandleFunc("/signup", signup)
+	r.NotFoundHandler = http.HandlerFunc(notfound)
+	http.ListenAndServe(":3000", r)
 }
