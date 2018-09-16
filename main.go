@@ -37,9 +37,9 @@ func notfound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	homeView = views.NewNamedView("bootstrap", "home")
-	contactView = views.NewNamedView("bootstrap", "contact")
-	faqView = views.NewNamedView("bootstrap", "faq")
+	homeView = views.NewView("bootstrap", "views/home.gohtml")
+	contactView = views.NewView("bootstrap", "views/contact.gohtml")
+	faqView = views.NewView("bootstrap", "views/faq.gohtml")
 	usersC := controllers.NewUsers()
 	r := mux.NewRouter()
 	r.HandleFunc("/", home)

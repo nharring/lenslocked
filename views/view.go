@@ -34,12 +34,6 @@ func NewView(layout string, files ...string) *View {
 	}
 }
 
-func NewNamedView(layout string, view string) *View {
-	var viewFile = ViewDir + view + TemplateExt
-	namedView := NewView(layout, viewFile)
-	return namedView
-}
-
 func layoutFiles() []string {
 	files, err := filepath.Glob(LayoutDir + "*" + TemplateExt)
 	if err != nil {
