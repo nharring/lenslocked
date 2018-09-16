@@ -12,6 +12,12 @@ type Users struct {
 	NewView *views.View
 }
 
+// SignupForm for use with gorilla/schema
+type SignupForm struct {
+	Email    string `schema:"email"`
+	Password string `schema:"password"`
+}
+
 // NewUsers creates a users controller
 //
 func NewUsers() *Users {
@@ -34,8 +40,10 @@ func (u *Users) New(w http.ResponseWriter, r *http.Request) {
 //
 // POST /signup
 func (u *Users) Create(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
+	var form SignupForm
+	if err := parseForm(r, &form); err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(w, r.PostForm)
+	fmt.Fprintln(w, "Email is ", form.Email)
+	fmt.Fprintln(w, "Password is ", form.Password)
 }
