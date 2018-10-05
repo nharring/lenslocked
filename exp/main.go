@@ -8,6 +8,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"lenslocked.com/models"
 )
 
 const (
@@ -39,24 +40,26 @@ func main() {
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
-	db, err := gorm.Open("postgres", psqlInfo)
+	us, err := models.NewUserService(psqlInfo)
 	if err != nil {
 		panic(err)
 	}
+	defer us.Close()
+	us.DestructiveReset()
 
-	defer db.Close()
-	db.LogMode(true)
-	db.AutoMigrate(&User{}, &Order{})
-
-	var user User
-	db.Preload("Orders").First(&user)
-	if db.Error != nil {
-		panic(db.Error)
+	user := models.User{
+		Name:  "Michael Scott",
+		Email: "michael@dundermifflin.com",
+	}
+	if err := us.Create(&user); err != nil {
+		panic(err)
 	}
 
-	fmt.Println("Email:", user.Email)
-	fmt.Println("Number of orders:", len(user.Orders))
-	fmt.Println("Orders:", user.Orders)
+	foundUser, err := us.ByID(1)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(foundUser)
 }
 
 func getInfo() (name, email string) {
